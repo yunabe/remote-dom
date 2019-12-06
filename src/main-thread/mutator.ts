@@ -17,7 +17,6 @@
 import { NodeContext } from './nodes';
 import { StringContext } from './strings';
 import { WorkerContext } from './worker';
-import { OffscreenCanvasProcessor } from './commands/offscreen-canvas';
 import { TransferrableMutationType, ReadableMutationType } from '../transfer/TransferrableMutation';
 import { EventSubscriptionProcessor } from './commands/event-subscription';
 import { BoundingClientRectProcessor } from './commands/bounding-client-rect';
@@ -32,7 +31,6 @@ import { Phase } from '../transfer/Phase';
 import { ObjectMutationProcessor } from './commands/object-mutation';
 import { ObjectCreationProcessor } from './commands/object-creation';
 import { ObjectContext } from './object-context';
-import { ImageBitmapProcessor } from './commands/image-bitmap';
 import { StorageProcessor } from './commands/storage';
 
 export class MutatorProcessor {
@@ -81,10 +79,8 @@ export class MutatorProcessor {
       [TransferrableMutationType.GET_BOUNDING_CLIENT_RECT]: BoundingClientRectProcessor.apply(null, args),
       [TransferrableMutationType.LONG_TASK_START]: sharedLongTaskProcessor,
       [TransferrableMutationType.LONG_TASK_END]: sharedLongTaskProcessor,
-      [TransferrableMutationType.OFFSCREEN_CANVAS_INSTANCE]: OffscreenCanvasProcessor.apply(null, args),
       [TransferrableMutationType.OBJECT_MUTATION]: ObjectMutationProcessor.apply(null, args),
       [TransferrableMutationType.OBJECT_CREATION]: ObjectCreationProcessor.apply(null, args),
-      [TransferrableMutationType.IMAGE_BITMAP_INSTANCE]: ImageBitmapProcessor.apply(null, args),
       [TransferrableMutationType.STORAGE]: StorageProcessor.apply(null, args),
     };
   }

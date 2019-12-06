@@ -23,10 +23,10 @@ export const enum TransferrableMutationType {
   GET_BOUNDING_CLIENT_RECT = 5,
   LONG_TASK_START = 6,
   LONG_TASK_END = 7,
-  OFFSCREEN_CANVAS_INSTANCE = 8,
+  // OFFSCREEN_CANVAS_INSTANCE = 8,
   OBJECT_MUTATION = 9,
   OBJECT_CREATION = 10,
-  IMAGE_BITMAP_INSTANCE = 11,
+  // IMAGE_BITMAP_INSTANCE = 11,
   STORAGE = 12,
 }
 
@@ -39,10 +39,8 @@ export const DefaultAllowedMutations = [
   TransferrableMutationType.GET_BOUNDING_CLIENT_RECT,
   TransferrableMutationType.LONG_TASK_START,
   TransferrableMutationType.LONG_TASK_END,
-  TransferrableMutationType.OFFSCREEN_CANVAS_INSTANCE,
   TransferrableMutationType.OBJECT_MUTATION,
   TransferrableMutationType.OBJECT_CREATION,
-  TransferrableMutationType.IMAGE_BITMAP_INSTANCE,
   TransferrableMutationType.STORAGE,
 ];
 
