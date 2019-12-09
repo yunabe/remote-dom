@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { HTMLElement } from './dom/HTMLElement';
+import { appendKeys as addCssKeys } from './css/CSSStyleDeclaration';
+import { HTMLElement, appendGlobalEventProperties } from './dom/HTMLElement';
 import { SVGElement } from './dom/SVGElement';
 import { HTMLAnchorElement } from './dom/HTMLAnchorElement';
 import { HTMLButtonElement } from './dom/HTMLButtonElement';
@@ -59,6 +60,7 @@ import { Element } from './dom/Element';
 import * as WebSocket from 'ws';
 import { MessageToWorker } from '../transfer/Messages';
 import { TransferrableKeys } from '../transfer/TransferrableKeys';
+import { serialize, deserialize } from '../transfer/Serialize';
 
 const globalScope: GlobalScope = {
   innerWidth: 0,
@@ -152,7 +154,15 @@ const code = `
 })(postMessage.bind(self) || noop, addEventListener.bind(self) || noop, removeEventListener.bind(self) || noop);
  */
 
-function initialize(document: Document, [innerWidth, innerHeight]: [number, number]): void {
+function initialize(
+  document: Document,
+  cssKeys: Array<string>,
+  globalEventHandlerKeys: Array<string>,
+  [innerWidth, innerHeight]: [number, number],
+): void {
+  addCssKeys(cssKeys);
+  appendGlobalEventProperties(globalEventHandlerKeys);
+
   const window = document.defaultView;
   window.innerWidth = innerWidth;
   window.innerHeight = innerHeight;
@@ -160,13 +170,13 @@ function initialize(document: Document, [innerWidth, innerHeight]: [number, numb
 
 export function setUp(ws: WebSocket) {
   function postMessage(message: any): void {
-    console.log('postMessage:', message);
-    ws.send(message);
+    const msg = serialize(message);
+    ws.send(msg);
   }
   let handlers: ((message: { data: MessageToWorker }) => void)[] = [];
   ws.onmessage = ev => {
-    const message: { data: any } = { data: ev.data };
-    handlers.forEach(handler => handler(message));
+    const data = deserialize(ev.data as string) as any;
+    handlers.forEach(handler => handler({ data }));
   };
 
   const document = new Document(globalScope);
@@ -180,7 +190,8 @@ export function setUp(ws: WebSocket) {
   document.isConnected = true;
   document.appendChild((document.body = document.createElement('body')));
 
-  initialize(document, [300, 400]);
+  // TODO: Not sure when ['onclick'] is used.
+  initialize(document, ['width', 'height', 'backgroundColor'], ['onclick'], [300, 400]);
   (global as any).window = document.defaultView;
   (global as any).document = document;
 

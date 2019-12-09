@@ -22,6 +22,7 @@ import { TransferrableKeys } from '../transfer/TransferrableKeys';
 import { InboundWorkerDOMConfiguration, normalizeConfiguration, Messanger } from './configuration';
 import { WorkerContext, WorkerContextImpl } from './worker';
 import { MessageToWorker } from '../transfer/Messages';
+import { serialize, deserialize } from '../transfer/Serialize';
 import { ObjectContext } from './object-context';
 
 const ALLOWABLE_MESSAGE_TYPES = [MessageType.MUTATE, MessageType.HYDRATE];
@@ -125,14 +126,16 @@ export function installMessanger(workerContext: WorkerContext, baseElement: HTML
 export function installWS(ws: WebSocket, baseElement: HTMLElement, config: InboundWorkerDOMConfiguration): void {
   const messanger: Messanger = {
     postMessage: (message: any): void => {
-      ws.send(JSON.stringify(message));
+      const serialized = serialize(message);
+      ws.send(serialized);
     },
     onmessage: null,
   };
   ws.onmessage = (e: MessageEvent) => {
     if (messanger.onmessage) {
+      const msg = deserialize(e.data);
       messanger.onmessage({
-        data: JSON.parse(e.data),
+        data: msg as any,
       });
     }
   };

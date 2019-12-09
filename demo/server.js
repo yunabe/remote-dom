@@ -60,9 +60,24 @@ server.on('upgrade', (request, socket, head) => {
       const { setUp } = require('../output/worker-thread/index.remote');
       setUp(ws);
 
-      const d = document.createElement('div');
-      document.body.appendChild(d);
+      let d = document.createElement('div');
       d.innerHTML = '<b>Hello</b> <i>World</i>!';
+      document.body.appendChild(d);
+
+      d = document.createElement('div');
+      d.style['width'] = '100px';
+      d.style['height'] = '100px';
+      let flag = true;
+      d.style['backgroundColor'] = '#f00';
+      d.addEventListener('click', () => {
+        if (flag) {
+          d.style['backgroundColor'] = '#00f';
+        } else {
+          d.style['backgroundColor'] = '#f0f';
+        }
+        flag = !flag;
+      });
+      document.body.appendChild(d);
     });
     return;
   }
