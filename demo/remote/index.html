@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html style="background: #e6e9e9;">
+<head>
+  <meta charset="utf-8" />
+  <title>Remote DOM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="/demo.css" rel="stylesheet">
+  <script src="/dist/main.mjs" type="module"></script>
+  <script src="/dist/main.js" nomodule defer></script>
+  <!-- This comment block is intended to make it easier to test both the script module and nomodule path -->
+  <!-- Comment either block to enable module/nomodule or disable it. -->
+  <!-- <script src="/dist/main.js" defer></script> -->
+</head>
+<body style="background: #e6e9e9;">
+  <div id="upgrade-me">
+  </div>
+  <script type="module">
+    import {installWS} from '/dist/main.mjs';
+    console.log('installWS:', installWS);
+    const ws = new WebSocket('ws://localhost:3001/remotedom');
+    ws.onopen= (ev)=>{
+        console.log('connected!');
+        installWS(ws, document.getElementById('upgrade-me'), {});
+        console.log('installed!');
+    };
+  </script>
+  <!-- This comment block is intended to make it easier to test both the script module and nomodule path -->
+  <!-- Comment either block to enable module/nomodule or disable it. -->
+  <!-- <script async=false defer>
+    document.addEventListener('DOMContentLoaded', function() {
+      MainThread.upgradeElement(document.getElementById('upgrade-me'), './dist/worker.js');
+    }, false);
+  </script> -->
+</body>
+</html>

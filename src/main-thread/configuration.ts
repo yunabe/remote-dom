@@ -19,6 +19,11 @@ import { Phase } from '../transfer/Phase';
 import { HydrateableNode } from '../transfer/TransferrableNodes';
 import { DefaultAllowedMutations } from '../transfer/TransferrableMutation';
 
+export interface Messanger {
+  postMessage(message: any): void;
+  onmessage: ((ev: MessageFromWorker) => any) | null;
+}
+
 /**
  * The callback for `mutationPump`. If specified, this callback will be called
  * for the new set of mutations pending. The callback can either immediately

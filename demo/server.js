@@ -18,10 +18,15 @@ import polka from 'polka';
 import sirv from 'sirv';
 import path from 'path';
 import fs from 'fs';
+import http from 'http';
+import url from 'url';
+const WebSocket = require('ws');
 
 const { PORT = 3001 } = process.env;
 
-polka()
+const server = http.createServer();
+
+const pol = polka({ server })
   .use(
     sirv(path.resolve(__dirname, '..'), {
       dev: true,
@@ -41,7 +46,26 @@ polka()
     const reqPath = req.path.substring('/slow/'.length);
     const file = fs.readFileSync(path.resolve(__dirname, reqPath));
     setTimeout(() => res.end(file), 6000);
-  })
-  .listen(PORT, _ => {
-    console.log(`> Running on http://localhost:${PORT}`);
   });
+
+const wss = new WebSocket.Server({ noServer: true });
+
+global.self = global;
+
+server.on('upgrade', (request, socket, head) => {
+  const pathname = url.parse(request.url).pathname;
+  if (pathname === '/remotedom') {
+    wss.handleUpgrade(request, socket, head, function done(ws) {
+      console.log('connected');
+      const { workerDOM, hydrate } = require('../output/worker-thread/index');
+      console.log({ workerDOM, hydrate });
+    });
+    return;
+  }
+  console.log('Unknown pathname:', pathname);
+  socket.destroy();
+});
+
+pol.listen(PORT, _ => {
+  console.log(`> Running on http://localhost:${PORT}`);
+});

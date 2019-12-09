@@ -15,8 +15,10 @@
  */
 
 import { fetchAndInstall } from './install';
+import { Messanger } from './configuration';
+export { installWS } from './install';
 
-export function upgradeElement(baseElement: Element, domURL: string): Promise<Worker | null> {
+export function upgradeElement(baseElement: Element, domURL: string): Promise<Messanger | null> {
   const authorURL = baseElement.getAttribute('src');
   if (authorURL) {
     return fetchAndInstall(baseElement as HTMLElement, {

@@ -15,14 +15,19 @@
  */
 
 import { MessageToWorker } from '../transfer/Messages';
-import { WorkerDOMConfiguration } from './configuration';
+import { WorkerDOMConfiguration, Messanger } from './configuration';
 import { createHydrateableRootNode } from './serialize';
 import { readableHydrateableRootNode, readableMessageToWorker } from './debugging';
 import { NodeContext } from './nodes';
 import { TransferrableKeys } from '../transfer/TransferrableKeys';
 import { StorageLocation } from '../transfer/TransferrableStorage';
 
-export class WorkerContext {
+export interface WorkerContext {
+  worker: Messanger;
+  messageToWorker(message: MessageToWorker): void;
+}
+
+export class WorkerContextImpl {
   private [TransferrableKeys.worker]: Worker;
   private nodeContext: NodeContext;
   private config: WorkerDOMConfiguration;
@@ -87,7 +92,7 @@ export class WorkerContext {
   /**
    * Returns the private worker.
    */
-  get worker(): Worker {
+  get worker(): Messanger {
     return this[TransferrableKeys.worker];
   }
 
@@ -101,6 +106,6 @@ export class WorkerContext {
     if (this.config.onSendMessage) {
       this.config.onSendMessage(message);
     }
-    this.worker.postMessage(message, []);
+    this[TransferrableKeys.worker].postMessage(message, []);
   }
 }
