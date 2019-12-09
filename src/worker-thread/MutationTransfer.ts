@@ -39,16 +39,13 @@ export function transfer(document: Document, mutation: Array<number>): void {
         ).buffer;
         const mutations = new Uint16Array(pendingMutations).buffer;
 
-        document.postMessage(
-          {
-            [TransferrableKeys.phase]: phase,
-            [TransferrableKeys.type]: phase === Phase.Mutating ? MessageType.MUTATE : MessageType.HYDRATE,
-            [TransferrableKeys.nodes]: nodes,
-            [TransferrableKeys.strings]: consumeStrings(),
-            [TransferrableKeys.mutations]: mutations,
-          } as MutationFromWorker,
-          [nodes, mutations],
-        );
+        document.postMessage({
+          [TransferrableKeys.phase]: phase,
+          [TransferrableKeys.type]: phase === Phase.Mutating ? MessageType.MUTATE : MessageType.HYDRATE,
+          [TransferrableKeys.nodes]: nodes,
+          [TransferrableKeys.strings]: consumeStrings(),
+          [TransferrableKeys.mutations]: mutations,
+        } as MutationFromWorker);
 
         pendingMutations = [];
         pending = false;

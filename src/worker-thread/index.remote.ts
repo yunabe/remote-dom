@@ -47,7 +47,6 @@ import { HTMLTableSectionElement } from './dom/HTMLTableSectionElement';
 import { HTMLTimeElement } from './dom/HTMLTimeElement';
 import { Document } from './dom/Document';
 import { GlobalScope } from './WorkerDOMGlobalScope';
-import { initialize } from './initialize';
 import { MutationObserver } from './MutationObserver';
 import { Event as WorkerDOMEvent } from './Event';
 import { Text } from './dom/Text';
@@ -57,6 +56,9 @@ import { Comment } from './dom/Comment';
 import { DOMTokenList } from './dom/DOMTokenList';
 import { DocumentFragment } from './dom/DocumentFragment';
 import { Element } from './dom/Element';
+import * as WebSocket from 'ws';
+import { MessageToWorker } from '../transfer/Messages';
+import { TransferrableKeys } from '../transfer/TransferrableKeys';
 
 const globalScope: GlobalScope = {
   innerWidth: 0,
@@ -104,11 +106,33 @@ const globalScope: GlobalScope = {
   MutationObserver,
 };
 
-const noop = () => void 0;
+/**
+const code = `
+      'use strict';
+      (function(){
+        ${workerDOMScript}
+        self['window'] = self;
+        var workerDOM = WorkerThread.workerDOM;
+        WorkerThread.hydrate(
+          workerDOM.document,
+          ${JSON.stringify(strings)},
+          ${JSON.stringify(skeleton)},
+          ${JSON.stringify(cssKeys)},
+          ${JSON.stringify(globalEventHandlerKeys)},
+          [${window.innerWidth}, ${window.innerHeight}],
+          ${JSON.stringify(localStorageData)},
+          ${JSON.stringify(sessionStorageData)}
+        );
+        workerDOM.document[${TransferrableKeys.observe}](this);
+        Object.keys(workerDOM).forEach(function(k){self[k]=workerDOM[k]});
+      }).call(self);
+      ${authorScript}
+      //# sourceURL=${encodeURI(config.authorURL)}`;
+ */
 
 // WorkerDOM.Document.defaultView ends up being the window object.
 // React requires the classes to exist off the window object for instanceof checks.
-export const workerDOM = (function(postMessage, addEventListener, removeEventListener) {
+/* export const workerDOM = (function(postMessage, addEventListener, removeEventListener) {
   const document = new Document(globalScope);
   // TODO(choumx): Avoid polluting Document's public API.
   document.postMessage = postMessage;
@@ -126,5 +150,39 @@ export const workerDOM = (function(postMessage, addEventListener, removeEventLis
 
   return document.defaultView;
 })(postMessage.bind(self) || noop, addEventListener.bind(self) || noop, removeEventListener.bind(self) || noop);
+ */
 
-export const hydrate = initialize;
+function initialize(document: Document, [innerWidth, innerHeight]: [number, number]): void {
+  const window = document.defaultView;
+  window.innerWidth = innerWidth;
+  window.innerHeight = innerHeight;
+}
+
+export function setUp(ws: WebSocket) {
+  function postMessage(message: any): void {
+    console.log('postMessage:', message);
+    ws.send(message);
+  }
+  let handlers: ((message: { data: MessageToWorker }) => void)[] = [];
+  ws.onmessage = ev => {
+    const message: { data: any } = { data: ev.data };
+    handlers.forEach(handler => handler(message));
+  };
+
+  const document = new Document(globalScope);
+  // TODO(choumx): Avoid polluting Document's public API.
+  document.postMessage = postMessage;
+  document.addGlobalEventListener = (type: 'message', handler: (message: { data: MessageToWorker }) => void) => {
+    handlers.push(handler);
+  };
+  // document.removeGlobalEventListener = removeEventListener;
+
+  document.isConnected = true;
+  document.appendChild((document.body = document.createElement('body')));
+
+  initialize(document, [300, 400]);
+  (global as any).window = document.defaultView;
+  (global as any).document = document;
+
+  document[TransferrableKeys.observe]();
+}

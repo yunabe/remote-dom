@@ -57,8 +57,12 @@ server.on('upgrade', (request, socket, head) => {
   if (pathname === '/remotedom') {
     wss.handleUpgrade(request, socket, head, function done(ws) {
       console.log('connected');
-      const { workerDOM, hydrate } = require('../output/worker-thread/index');
-      console.log({ workerDOM, hydrate });
+      const { setUp } = require('../output/worker-thread/index.remote');
+      setUp(ws);
+
+      const d = document.createElement('div');
+      document.body.appendChild(d);
+      d.innerHTML = '<b>Hello</b> <i>World</i>!';
     });
     return;
   }

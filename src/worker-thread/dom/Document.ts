@@ -64,6 +64,8 @@ import { set as setPhase } from '../phase';
 
 const DOCUMENT_NAME = '#document';
 
+// const messageHandler: ({ data }: ) => void
+
 export class Document extends Element {
   public defaultView: WorkerDOMGlobalScope;
   public documentElement: Document;
@@ -71,7 +73,7 @@ export class Document extends Element {
 
   // Internal variables.
   public postMessage: PostMessage;
-  public addGlobalEventListener: Function;
+  public addGlobalEventListener: (type: 'message', handler: Function) => void;
   public removeGlobalEventListener: Function;
   public [TransferrableKeys.allowTransfer]: boolean = true;
 

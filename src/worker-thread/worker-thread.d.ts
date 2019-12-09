@@ -21,7 +21,7 @@ import { Comment } from './dom/Comment';
 import { TransferrableKeys } from '../transfer/TransferrableKeys';
 
 type RenderableElement = HTMLElement | SVGElement | Text | Comment;
-type PostMessage = (message: any, transfer?: Transferable[]) => void;
+type PostMessage = (message: any) => void;
 declare const DEBUG_ENABLED: boolean;
 
 type SerializableType = TransferrableObject | number | string;
