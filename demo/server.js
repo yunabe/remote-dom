@@ -57,6 +57,8 @@ server.on('upgrade', (request, socket, head) => {
   if (pathname === '/remotedom') {
     wss.handleUpgrade(request, socket, head, function done(ws) {
       console.log('connected');
+      const { resetWorkerModules } = require('../output/worker-thread/reset');
+      resetWorkerModules();
       const { setUp } = require('../output/worker-thread/index.remote');
       setUp(ws);
 

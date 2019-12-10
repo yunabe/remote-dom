@@ -190,7 +190,7 @@ export function setUp(ws: WebSocket) {
   document.isConnected = true;
   document.appendChild((document.body = document.createElement('body')));
 
-  // TODO: Not sure when ['onclick'] is used.
+  // TODO: Not sure when ['onclick'] is necessary to support element.onclick = ..;
   initialize(document, ['width', 'height', 'backgroundColor'], ['onclick'], [300, 400]);
   (global as any).window = document.defaultView;
   (global as any).document = document;
